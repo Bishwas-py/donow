@@ -3,7 +3,10 @@ use clap::{Args, Parser, Subcommand};
 #[derive(Args, Debug)]
 pub struct CreateTodo {
     pub title: String,
-    pub description: String,
+    pub will_be_completed_at: String,
+
+    #[arg(short, long)]
+    pub description: Option<String>,
 }
 
 #[derive(Debug, Args)]
@@ -14,7 +17,7 @@ pub struct DeleteTodo {
 #[derive(Debug, Args)]
 pub struct CompleteTodo {
     pub id: i32,
-    pub days_ago: String
+    pub days_ago: String,
 }
 
 #[derive(Debug, Args)]
@@ -24,13 +27,19 @@ pub struct UpdateTodo {
     pub description: String,
 }
 
+#[derive(Debug, Args)]
+pub struct ShowTodo {
+    #[arg(short='f', long, default_value_t=false)]
+    pub is_fancy: bool
+}
+
 #[derive(Debug, Subcommand)]
 pub enum TodoSubcommand {
     Create(CreateTodo),
     Update(UpdateTodo),
     Delete(DeleteTodo),
     Complete(CompleteTodo),
-    Show,
+    Show(ShowTodo),
 }
 
 #[derive(Debug, Parser)]

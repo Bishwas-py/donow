@@ -17,7 +17,10 @@ pub fn parse_relative_time(input: &str) -> Option<chrono::DateTime<Utc>> {
             };
             return match direction_str {
                 "ago" => Some(Utc::now() - duration),
-                "in" => Some(Utc::now() + duration),
+                "later" => {
+                    println!("{:?}   {:?}", duration, direction_str);
+                    Some(Utc::now() + duration)
+                },
                 _ => None,
             };
         }

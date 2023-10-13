@@ -2,12 +2,10 @@ use crate::args::todo::{TodoCommand, TodoSubcommand};
 use crate::ops::todo_ops::*;
 use clap::Parser;
 
-mod db;
-mod models;
 mod schema;
 mod ops;
+mod core;
 mod args;
-mod utils;
 
 fn main() {
     let args = TodoCommand::parse();
@@ -22,8 +20,8 @@ fn main() {
         TodoSubcommand::Delete(todo) => {
             delete_todo(todo);
         }
-        TodoSubcommand::Show => {
-            show_todos();
+        TodoSubcommand::Show(show) => {
+            show_todos(show.is_fancy);
         }
         TodoSubcommand::Complete(todo) => {
             complete_todo(todo)

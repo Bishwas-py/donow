@@ -1,24 +1,25 @@
 use crate::args::todo::{CompleteTodo, CreateTodo, DeleteTodo, UpdateTodo};
-use crate::db::establish_connection;
-use crate::models::{NewTodo, Todo};
+use crate::core::db::establish_connection;
+use crate::core::models::{NewTodo, NewTodoEntry, Todo};
 use diesel::prelude::*;
-use crate::utils::parse_relative_time;
+use crate::core::utils::parse_relative_time;
 
 pub fn create_todo(todo: CreateTodo) -> usize {
     println!("Creating todo: {:?}", todo);
-    use crate::schema::todos::dsl::*;
 
     let connection = &mut establish_connection();
+    let will_be_completed_at = parse_relative_time(&todo.will_be_completed_at)
+        .unwrap()
+        .naive_utc();
 
-    let new_todo = NewTodo {
-        description: &todo.description,
+    let todo_entry = NewTodoEntry {
         title: &todo.title,
+        description: todo.description,
+        will_be_completed_at
     };
 
-    diesel::insert_into(todos)
-        .values(&new_todo)
-        .execute(connection)
-        .expect("Error saving new todo")
+    let new_todo = NewTodo::new(todo_entry);
+    new_todo.create(connection)
 }
 
 
@@ -61,7 +62,7 @@ pub fn complete_todo(todo: CompleteTodo) {
         .expect("Error updating todo");
 }
 
-pub fn show_todos() {
+pub fn show_todos(show_fancy: bool) {
     println!("Showing todos");
     use crate::schema::todos::dsl::*;
 
@@ -71,7 +72,14 @@ pub fn show_todos() {
         .expect("Error loading todos");
 
     println!("Displaying {} todos", results.len());
-    for todo in results {
-        println!("{:?}", todo);
+    if show_fancy && !results.is_empty() {
+        println!("========================================");
+        for todo in results {
+            todo.display_todos_fancy()
+        }
+    } else {
+        for todo in results {
+            println!("{:?}", todo);
+        }
     }
 }
