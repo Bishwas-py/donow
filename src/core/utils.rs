@@ -10,6 +10,9 @@ pub fn parse_relative_time(input: &str) -> Option<chrono::DateTime<Utc>> {
     ) = (parts.next(), parts.next(), parts.next()) {
         if let Ok(amount) = i64::from_str(amount_str) {
             let duration = match unit_str {
+                "year" | "years" => Duration::days(amount * 365),
+                "month" | "months" => Duration::days(amount * 30),
+                "week" | "weeks" => Duration::weeks(amount),
                 "day" | "days" => Duration::days(amount),
                 "hour" | "hours" => Duration::hours(amount),
                 "minute" | "minutes" => Duration::minutes(amount),

@@ -21,7 +21,7 @@ fn main() {
             delete_todo(todo);
         }
         TodoSubcommand::Show(show) => {
-            show_todos(show.is_fancy);
+            show_todos(show);
         }
         TodoSubcommand::Complete(todo) => {
             complete_todo(todo)

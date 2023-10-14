@@ -1,4 +1,4 @@
-use crate::args::todo::{CompleteTodo, CreateTodo, DeleteTodo, UpdateTodo};
+use crate::args::todo::{CompleteTodo, CreateTodo, DeleteTodo, ShowTodo, UpdateTodo};
 use crate::core::db::establish_connection;
 use crate::core::models::{NewTodo, NewTodoEntry, Todo};
 use diesel::prelude::*;
@@ -15,7 +15,7 @@ pub fn create_todo(todo: CreateTodo) -> usize {
     let todo_entry = NewTodoEntry {
         title: &todo.title,
         description: todo.description,
-        will_be_completed_at
+        will_be_completed_at,
     };
 
     let new_todo = NewTodo::new(todo_entry);
@@ -62,17 +62,33 @@ pub fn complete_todo(todo: CompleteTodo) {
         .expect("Error updating todo");
 }
 
-pub fn show_todos(show_fancy: bool) {
+pub fn show_todos(show: ShowTodo) {
     println!("Showing todos");
     use crate::schema::todos::dsl::*;
 
     let connection = &mut establish_connection();
-    let results = todos
-        .load::<Todo>(connection)
-        .expect("Error loading todos");
+
+    let results = match show.id {
+        None => {
+            match show.limit {
+                None => {
+                    todos
+                        .load::<Todo>(connection)
+                }
+                Some(limit_num) => {
+                    todos.limit(limit_num)
+                        .load::<Todo>(connection)
+                }
+            }
+        }
+        Some(todo_id) => {
+            todos.filter(id.eq(todo_id))
+                .load::<Todo>(connection)
+        }
+    }.expect("Error loading todos");
 
     println!("Displaying {} todos", results.len());
-    if show_fancy && !results.is_empty() {
+    if show.is_fancy && !results.is_empty() {
         println!("========================================");
         for todo in results {
             todo.display_todos_fancy()
